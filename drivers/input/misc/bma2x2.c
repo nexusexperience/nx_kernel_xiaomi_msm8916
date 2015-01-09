@@ -1469,6 +1469,7 @@ struct bma2x2_data {
 	struct mutex value_mutex;
 	struct mutex enable_mutex;
 	struct mutex mode_mutex;
+	struct workqueue_struct *data_wq;
 	struct delayed_work work;
 	struct work_struct irq_work;
 	struct regulator *vdd;
@@ -4873,7 +4874,7 @@ static void bma2x2_work_func(struct work_struct *work)
 	mutex_lock(&bma2x2->value_mutex);
 	bma2x2->value = acc;
 	mutex_unlock(&bma2x2->value_mutex);
-	schedule_delayed_work(&bma2x2->work, delay);
+	queue_delayed_work(bma2x2->data_wq, &bma2x2->work, delay);
 }
 #endif
 
@@ -5129,7 +5130,8 @@ static void bma2x2_set_enable(struct device *dev, int enable)
 			bma2x2_set_mode(bma2x2->bma2x2_client,
 					BMA2X2_MODE_NORMAL);
 #ifndef CONFIG_BMA_ENABLE_NEWDATA_INT
-			schedule_delayed_work(&bma2x2->work,
+			queue_delayed_work(bma2x2->data_wq,
+				&bma2x2->work,
 				msecs_to_jiffies(atomic_read(&bma2x2->delay)));
 #endif
 			atomic_set(&bma2x2->enable, 1);
@@ -7179,6 +7181,12 @@ static int bma2x2_probe(struct i2c_client *client,
 #ifndef CONFIG_BMA_ENABLE_NEWDATA_INT
 	INIT_DELAYED_WORK(&data->work, bma2x2_work_func);
 #endif
+	data->data_wq = create_freezable_workqueue("bma2x2_data_work");
+	if (!data->data_wq) {
+		dev_err(&client->dev, "Cannot get create workqueue!\n");
+		goto free_irq_exit;
+	}
+
 	atomic_set(&data->delay, BMA2X2_MAX_DELAY);
 	atomic_set(&data->enable, 0);
 
@@ -7187,7 +7195,7 @@ static int bma2x2_probe(struct i2c_client *client,
 		dev_err(&client->dev,
 			"Cannot allocate input device\n");
 		err = -ENOMEM;
-		goto free_irq_exit;
+		goto destroy_workqueue_exit;
 	}
 
 	dev_interrupt = devm_input_allocate_device(&client->dev);
@@ -7195,7 +7203,7 @@ static int bma2x2_probe(struct i2c_client *client,
 		dev_err(&client->dev,
 			"Cannot allocate input interrupt device\n");
 		err = -ENOMEM;
-		goto free_irq_exit;
+		goto destroy_workqueue_exit;
 	}
 
 	/* only value events reported */
@@ -7417,6 +7425,8 @@ destroy_g_sensor_class_exit:
 	class_destroy(data->g_sensor_class);
 #endif
 
+destroy_workqueue_exit:
+	destroy_workqueue(data->data_wq);
 free_irq_exit:
 disable_power_exit:
 	bma2x2_power_ctl(data, false);
@@ -7459,7 +7469,8 @@ static void bma2x2_late_resume(struct early_suspend *h)
 	if (atomic_read(&data->enable) == 1) {
 		bma2x2_set_mode(data->bma2x2_client, BMA2X2_MODE_NORMAL);
 #ifndef CONFIG_BMA_ENABLE_NEWDATA_INT
-		schedule_delayed_work(&data->work,
+		queue_delayed_work(data->data_wq,
+				&data->work,
 				msecs_to_jiffies(atomic_read(&data->delay)));
 #endif
 	}
@@ -7489,6 +7500,7 @@ static int bma2x2_remove(struct i2c_client *client)
 		sysfs_remove_group(&data->input->dev.kobj,
 				&bma2x2_attribute_group);
 
+	destroy_workqueue(data->data_wq);
 	bma2x2_set_enable(&client->dev, 0);
 	bma2x2_power_deinit(data);
 	i2c_set_clientdata(client, NULL);
