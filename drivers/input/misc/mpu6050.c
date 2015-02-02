@@ -52,10 +52,12 @@
 #define MPU6050_ACCEL_MIN_POLL_INTERVAL_MS	10
 #define MPU6050_ACCEL_MAX_POLL_INTERVAL_MS	5000
 #define MPU6050_ACCEL_DEFAULT_POLL_INTERVAL_MS	200
+#define MPU6050_ACCEL_INT_MAX_DELAY			19
 
 #define MPU6050_GYRO_MIN_POLL_INTERVAL_MS	10
 #define MPU6050_GYRO_MAX_POLL_INTERVAL_MS	5000
 #define MPU6050_GYRO_DEFAULT_POLL_INTERVAL_MS	200
+#define MPU6050_GYRO_INT_MAX_DELAY		18
 
 #define MPU6050_RAW_ACCEL_DATA_LEN	6
 #define MPU6050_RAW_GYRO_DATA_LEN	6
@@ -2350,6 +2352,10 @@ static int mpu6050_probe(struct i2c_client *client,
 	sensor->accel_cdev.sensors_poll_delay = mpu6050_accel_cdev_poll_delay;
 	sensor->accel_cdev.sensors_enable_wakeup =
 					mpu6050_accel_cdev_enable_wakeup;
+	if ((sensor->pdata->use_int) &&
+			gpio_is_valid(sensor->pdata->gpio_int))
+		sensor->accel_cdev.max_delay = MPU6050_ACCEL_INT_MAX_DELAY;
+
 	ret = sensors_classdev_register(&sensor->accel_dev->dev,
 			&sensor->accel_cdev);
 	if (ret) {
@@ -2363,6 +2369,10 @@ static int mpu6050_probe(struct i2c_client *client,
 	sensor->gyro_cdev.delay_msec = sensor->gyro_poll_ms;
 	sensor->gyro_cdev.sensors_enable = mpu6050_gyro_cdev_enable;
 	sensor->gyro_cdev.sensors_poll_delay = mpu6050_gyro_cdev_poll_delay;
+	if ((sensor->pdata->use_int) &&
+			gpio_is_valid(sensor->pdata->gpio_int))
+		sensor->gyro_cdev.max_delay = MPU6050_GYRO_INT_MAX_DELAY;
+
 	ret = sensors_classdev_register(&sensor->gyro_dev->dev,
 			&sensor->gyro_cdev);
 	if (ret) {
