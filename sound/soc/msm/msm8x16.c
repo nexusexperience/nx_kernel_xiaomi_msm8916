@@ -1466,30 +1466,22 @@ static void *def_msm8x16_wcd_mbhc_cal(void)
 	 * one for current source and another for Micbias.
 	 * all btn_low corresponds to threshold for current source
 	 * all bt_high corresponds to threshold for Micbias
+	 * Below thresholds are based on following resistances
+	 * 0-70    == Button 0
+	 * 110-180 == Button 1
+	 * 210-290 == Button 2
+	 * 360-680 == Button 3
 	 */
-#ifdef CONFIG_MACH_HM2014811
-	btn_low[0] = 0;
+	btn_low[0] = 75;
 	btn_high[0] = 75;
-	btn_low[1] = 75;
-	btn_high[1] = 255;
-	btn_low[2] = 255;
-	btn_high[2] = 420;
-	btn_low[3] = 420;
-	btn_high[3] = 421;
-	btn_low[4] = 422;
-	btn_high[4] = 423;
-#else
-	btn_low[0] = 25;
-	btn_high[0] = 25;
-	btn_low[1] = 50;
-	btn_high[1] = 50;
-	btn_low[2] = 75;
-	btn_high[2] = 75;
-	btn_low[3] = 112;
-	btn_high[3] = 112;
-	btn_low[4] = 137;
-	btn_high[4] = 137;
-#endif
+	btn_low[1] = 150;
+	btn_high[1] = 150;
+	btn_low[2] = 237;
+	btn_high[2] = 237;
+	btn_low[3] = 450;
+	btn_high[3] = 450;
+	btn_low[4] = 500;
+	btn_high[4] = 500;
 
 	return msm8x16_wcd_cal;
 }
