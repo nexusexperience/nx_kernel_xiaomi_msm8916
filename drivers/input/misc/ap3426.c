@@ -1527,7 +1527,7 @@ static int ap3426_probe(struct i2c_client *client,
 	di->als_cdev.sensors_enable = ap3426_cdev_enable_als;
 	di->als_cdev.sensors_poll_delay = ap3426_cdev_set_als_delay;
 	di->als_cdev.sensors_flush = ap3426_cdev_als_flush;
-	res = sensors_classdev_register(&client->dev, &di->als_cdev);
+	res = sensors_classdev_register(&di->input_light->dev, &di->als_cdev);
 	if (res) {
 		dev_err(&client->dev, "sensors class register failed.\n");
 		goto err_register_als_cdev;
@@ -1537,7 +1537,8 @@ static int ap3426_probe(struct i2c_client *client,
 	di->ps_cdev.sensors_enable = ap3426_cdev_enable_ps;
 	di->ps_cdev.sensors_poll_delay = ap3426_cdev_set_ps_delay;
 	di->ps_cdev.sensors_flush = ap3426_cdev_ps_flush;
-	res = sensors_classdev_register(&client->dev, &di->ps_cdev);
+	res = sensors_classdev_register(&di->input_proximity->dev,
+			&di->ps_cdev);
 	if (res) {
 		dev_err(&client->dev, "sensors class register failed.\n");
 		goto err_register_ps_cdev;
