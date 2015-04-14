@@ -2008,6 +2008,9 @@ int mdss_dsi_cmdlist_commit(struct mdss_dsi_ctrl_pdata *ctrl, int from_mdp)
 	MDSS_XLOG(ctrl->ndx, from_mdp, ctrl->mdp_busy, current->pid,
 							XLOG_FUNC_ENTRY);
 
+	if (req == NULL)
+		goto need_lock;
+
 	if (!ctrl->burst_mode_enabled || from_mdp) {
 		/* make sure dsi_cmd_mdp is idle when
 		 * burst mode is not enabled
@@ -2038,10 +2041,6 @@ int mdss_dsi_cmdlist_commit(struct mdss_dsi_ctrl_pdata *ctrl, int from_mdp)
 				(req && (req->flags & CMD_REQ_HS_MODE)))
 			mdss_dsi_cmd_start_hs_clk_lane(ctrl);
 	}
-
-
-	if (req == NULL)
-		goto need_lock;
 
 	MDSS_XLOG(ctrl->ndx, req->flags, req->cmds_cnt, from_mdp, current->pid);
 
