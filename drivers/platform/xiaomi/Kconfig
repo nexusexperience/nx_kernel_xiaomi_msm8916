@@ -1,0 +1,24 @@
+# Xiaomi configuration options
+
+config MACH_XIAOMI
+	bool "Xiaomi device"
+	depends on ARCH_MSM
+	help
+	  Support for Xiaomi products
+
+config MACH_XIAOMI_MSM8916
+	bool "Xiaomi MSM8916"
+	depends on ARCH_MSM8916
+	select MACH_XIAOMI
+	help
+	  Support for MSM8916 Xiaomi variants
+
+menu "Xiaomi board selection"
+
+config MACH_HM2014811
+	bool "HM2014811 board"
+	select MACH_XIAOMI_MSM8916
+	help
+	  Support for Xiaomi HM2014811 variant
+
+endmenu
