@@ -2923,7 +2923,7 @@ static int bma2x2_set_mode(struct i2c_client *client, unsigned char mode)
 static int bma2x2_get_mode(struct i2c_client *client, unsigned char *mode)
 {
 	int comres = 0;
-	unsigned char data1, data2;
+	unsigned char data1 = 0, data2 = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_MODE_CTRL_REG, &data1);
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_LOW_NOISE_CTRL_REG,
@@ -2978,7 +2978,7 @@ static int bma2x2_get_mode(struct i2c_client *client, unsigned char *mode)
 static int bma2x2_set_range(struct i2c_client *client, unsigned char Range)
 {
 	int comres = 0;
-	unsigned char data1;
+	unsigned char data1 = 0;
 
 	if ((Range == 3) || (Range == 5) || (Range == 8) || (Range == 12)) {
 		comres = bma2x2_smbus_read_byte(client, BMA2X2_RANGE_SEL_REG,
@@ -3015,7 +3015,7 @@ static int bma2x2_set_range(struct i2c_client *client, unsigned char Range)
 static int bma2x2_get_range(struct i2c_client *client, unsigned char *Range)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_RANGE_SEL__REG, &data);
 	data = BMA2X2_GET_BITSLICE(data, BMA2X2_RANGE_SEL);
@@ -3028,7 +3028,7 @@ static int bma2x2_get_range(struct i2c_client *client, unsigned char *Range)
 static int bma2x2_set_bandwidth(struct i2c_client *client, unsigned char BW)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 	int Bandwidth = 0;
 
 	if (BW > 7 && BW < 16) {
@@ -3439,7 +3439,7 @@ static int bma2x2_get_cal_ready(struct i2c_client *client,
 					unsigned char *calrdy)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_FAST_CAL_RDY_S__REG,
 			&data);
@@ -3578,7 +3578,7 @@ static int bma2x2_set_selftest_st(struct i2c_client *client, unsigned char
 		selftest)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_EN_SELF_TEST__REG,
 			&data);
@@ -3592,7 +3592,7 @@ static int bma2x2_set_selftest_st(struct i2c_client *client, unsigned char
 static int bma2x2_set_selftest_stn(struct i2c_client *client, unsigned char stn)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_NEG_SELF_TEST__REG,
 			&data);
@@ -3606,7 +3606,7 @@ static int bma2x2_set_selftest_stn(struct i2c_client *client, unsigned char stn)
 static int bma2x2_set_selftest_amp(struct i2c_client *client, unsigned char amp)
 {
 	int comres = 0;
-	unsigned char data;
+	unsigned char data = 0;
 
 	comres = bma2x2_smbus_read_byte(client, BMA2X2_SELF_TEST_AMP__REG,
 			&data);
