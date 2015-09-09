@@ -32,14 +32,9 @@
 #include <linux/sensors.h>
 #include <linux/input/ft5x06_ts.h>
 
-#if defined(CONFIG_FB)
+#ifdef CONFIG_FB
 #include <linux/notifier.h>
 #include <linux/fb.h>
-
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-#include <linux/earlysuspend.h>
-/* Early-suspend level */
-#define FT_SUSPEND_LEVEL 1
 #endif
 
 #define FT_DRIVER_VERSION	0x02
@@ -257,10 +252,8 @@ struct ft5x06_ts_data {
 	u32 tch_data_len;
 	u8 fw_ver[3];
 	u8 fw_vendor_id;
-#if defined(CONFIG_FB)
+#ifdef CONFIG_FB
 	struct notifier_block fb_notif;
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	struct early_suspend early_suspend;
 #endif
 	struct pinctrl *ts_pinctrl;
 	struct pinctrl_state *pinctrl_state_active;
@@ -1266,7 +1259,7 @@ static int ft5x06_ts_resume(struct device *dev)
 }
 
 static const struct dev_pm_ops ft5x06_ts_pm_ops = {
-#if (!defined(CONFIG_FB) && !defined(CONFIG_HAS_EARLYSUSPEND))
+#ifndef CONFIG_FB
 	.suspend = ft5x06_ts_suspend,
 	.resume = ft5x06_ts_resume,
 #endif
@@ -1285,7 +1278,7 @@ static int ft5x06_ts_resume(struct device *dev)
 
 #endif
 
-#if defined(CONFIG_FB)
+#ifdef CONFIG_FB
 static int fb_notifier_callback(struct notifier_block *self,
 				 unsigned long event, void *data)
 {
@@ -1304,24 +1297,6 @@ static int fb_notifier_callback(struct notifier_block *self,
 	}
 
 	return 0;
-}
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-static void ft5x06_ts_early_suspend(struct early_suspend *handler)
-{
-	struct ft5x06_ts_data *data = container_of(handler,
-						   struct ft5x06_ts_data,
-						   early_suspend);
-
-	ft5x06_ts_suspend(&data->client->dev);
-}
-
-static void ft5x06_ts_late_resume(struct early_suspend *handler)
-{
-	struct ft5x06_ts_data *data = container_of(handler,
-						   struct ft5x06_ts_data,
-						   early_suspend);
-
-	ft5x06_ts_resume(&data->client->dev);
 }
 #endif
 
@@ -2446,7 +2421,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 			data->pdata->fw_name, data->fw_ver[0],
 			data->fw_ver[1], data->fw_ver[2]);
 
-#if defined(CONFIG_FB)
+#ifdef CONFIG_FB
 	data->fb_notif.notifier_call = fb_notifier_callback;
 
 	err = fb_register_client(&data->fb_notif);
@@ -2454,12 +2429,6 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 	if (err)
 		dev_err(&client->dev, "Unable to register fb_notifier: %d\n",
 			err);
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN +
-						    FT_SUSPEND_LEVEL;
-	data->early_suspend.suspend = ft5x06_ts_early_suspend;
-	data->early_suspend.resume = ft5x06_ts_late_resume;
-	register_early_suspend(&data->early_suspend);
 #endif
 
 	return 0;
@@ -2571,11 +2540,9 @@ static int ft5x06_ts_remove(struct i2c_client *client)
 	device_remove_file(&client->dev, &dev_attr_update_fw);
 	device_remove_file(&client->dev, &dev_attr_fw_name);
 
-#if defined(CONFIG_FB)
+#ifdef CONFIG_FB
 	if (fb_unregister_client(&data->fb_notif))
 		dev_err(&client->dev, "Error occurred while unregistering fb_notifier.\n");
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	unregister_early_suspend(&data->early_suspend);
 #endif
 	free_irq(client->irq, data);
 
