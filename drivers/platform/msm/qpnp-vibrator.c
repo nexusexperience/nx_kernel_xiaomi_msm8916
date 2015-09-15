@@ -338,6 +338,22 @@ static int qpnp_vib_parse_dt(struct qpnp_vib *vib)
 	return 0;
 }
 
+static ssize_t qpnp_vib_max_show(struct device *dev,
+                                        struct device_attribute *attr,
+                                        char *buf)
+{
+        return scnprintf(buf, PAGE_SIZE, "%d\n", QPNP_VIB_MAX_LEVEL);
+}
+static DEVICE_ATTR(vtg_max, S_IRUGO, qpnp_vib_max_show, NULL);
+
+static ssize_t qpnp_vib_min_show(struct device *dev,
+                                        struct device_attribute *attr,
+                                        char *buf)
+{
+        return scnprintf(buf, PAGE_SIZE, "%d\n", QPNP_VIB_MIN_LEVEL);
+}
+static DEVICE_ATTR(vtg_min, S_IRUGO, qpnp_vib_min_show, NULL);
+
 static ssize_t qpnp_vib_level_show(struct device *dev,
 					struct device_attribute *attr,
 					char *buf)
@@ -439,6 +455,8 @@ static int qpnp_vibrator_probe(struct spmi_device *spmi)
 	if (rc < 0)
 		return rc;
 
+	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_min);
+	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_max);
 	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_level);
 
 	return rc;
