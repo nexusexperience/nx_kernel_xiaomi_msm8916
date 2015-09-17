@@ -105,7 +105,6 @@
 };
 
 &pm8916_pon {
-	/delete-property/ qcom,store-hard-reset-reason;
 	qcom,poweron-vadc = <&pm8916_vadc>;
 
 	qcom,pon_1 {
@@ -129,7 +128,7 @@
 &pm8916_gpios {
 	gpio@c100 { /* GPIO 2 */
 		/* NFC_CLK_REQ */
-		status = "ok";
+		status = "disabled";
 	};
 
 	gpio@c200 { /* GPIO 3 */
