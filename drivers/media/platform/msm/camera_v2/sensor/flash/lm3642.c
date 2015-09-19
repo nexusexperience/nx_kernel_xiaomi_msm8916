@@ -12,6 +12,7 @@
  */
 #include <linux/module.h>
 #include <linux/export.h>
+#include <mach/gpiomux.h>
 #include "msm_camera_io_util.h"
 #include "msm_led_flash.h"
 
