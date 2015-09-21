@@ -1254,8 +1254,24 @@ static int mdss_dsi_set_refresh_rate_range(struct device_node *pan_node,
 		rc = 0;
 	}
 
-	pr_info("dyn_fps: min = %d, max = %d\n",
-			pinfo->min_fps, pinfo->max_fps);
+	rc = of_property_read_u32(pan_node,
+			"qcom,mdss-dsi-idle-refresh-rate",
+			&pinfo->idle_fps);
+	if (rc) {
+		pr_warn("%s:%d, Unable to read idle refresh rate\n",
+				__func__, __LINE__);
+
+		/*
+		 * Since max refresh rate was not specified when dynamic
+		 * fps is enabled, using the default panel refresh rate
+		 * as max refresh rate supported.
+		 */
+		pinfo->idle_fps = MIN_REFRESH_RATE;
+		rc = 0;
+	}
+
+	pr_info("dyn_fps: min = %d, max = %d\n, idle = %d\n",
+			pinfo->min_fps, pinfo->max_fps, pinfo->idle_fps);
 	return rc;
 }
 
