@@ -1262,11 +1262,10 @@ static int mdss_dsi_set_refresh_rate_range(struct device_node *pan_node,
 				__func__, __LINE__);
 
 		/*
-		 * Since max refresh rate was not specified when dynamic
-		 * fps is enabled, using the default panel refresh rate
-		 * as max refresh rate supported.
+		 * Since idle refresh rate is not specified when dynamic
+		 * fps is enabled, using idle fps as min refresh rate
 		 */
-		pinfo->idle_fps = MIN_REFRESH_RATE;
+		pinfo->idle_fps = pinfo->min_fps;
 		rc = 0;
 	}
 
